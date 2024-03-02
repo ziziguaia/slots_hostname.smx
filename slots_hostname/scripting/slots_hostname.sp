@@ -2,7 +2,6 @@
 //強制1.7以後的新語法
 #pragma newdecls required
 #include <sourcemod>
-#define v "3.2"
 
 
 Handle needconfogl = INVALID_HANDLE;
@@ -16,8 +15,8 @@ int slot = 0;
 
 public Plugin myinfo =
 {
-    name = "wonton",
-    author = v,
+    name = "slot_hostname",
+    author = "wonton",
     description = "服务器名",
     version = "1.0",
     url = "URL"
@@ -28,7 +27,7 @@ public Plugin myinfo =
 
 public void OnPluginStart()
 {
-    RegConsoleCmd("sm_host_slot", CMD_slot, "设置侦测人数");
+    RegAdminCmd("sm_host_slot", CMD_slot, ADMFLAG_CONFIG, "设置侦测人数");
     needconfogl = CreateConVar("nc_needconfogl", "{hostname}{slot}", "创造新的conavr来合并服务器名称");
     
     cravhost = FindConVar("hostname");
