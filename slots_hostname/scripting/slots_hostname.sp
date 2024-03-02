@@ -9,7 +9,8 @@ Handle needconfogl = INVALID_HANDLE;
 char g_slot[64];
 char finalname[256];
 Handle cravhost = INVALID_HANDLE;
-
+char arg1[64];
+int g_slots = 8;//默认人数为8
 int slot = 0;
 
 
@@ -27,10 +28,12 @@ public Plugin myinfo =
 
 public void OnPluginStart()
 {
-
+    RegConsoleCmd("sm_host_slot", CMD_slot, "设置侦测人数");
     needconfogl = CreateConVar("nc_needconfogl", "{hostname}{slot}", "创造新的conavr来合并服务器名称");
     
     cravhost = FindConVar("hostname");
+
+    HookEvent("player_team", Event_player_team);
 
     sethostname();
 }
@@ -44,35 +47,48 @@ public void OnMapStart()
 }
 
 
-public void OnClientPutInServer()
-{
-    slot++;
-    if(slot >= 8)
-    {
-        g_slot = "";
-        getneedconfog();
-        sethostname();
-    }
-    else if(slot < 8)
-    {
-        g_slot = "[缺人]";
-        getneedconfog();
-        sethostname();
-    }
+public void Event_player_team(Event event, const char[] name, bool dontBroadcast){
+    int slot1 = GetTeamCount(2);
+    int slot2 = GetTeamCount(3);
+    slot = slot1 + slot2;
+    sethostname_nobody();
 }
 
-public void OnClientDisconnect()
+int GetTeamCount(int team)
 {
-    slot--;
-    if(slot < 8)
+    int count;
+    for (int i = 1; i <= MaxClients; i++)
     {
-        g_slot = "[缺人]";
+        if (!IsClientInGame(i))
+            continue;
+        if (IsFakeClient(i))
+            continue;
+        if (GetClientTeam(i) == team)
+            count++;
+    }
+    return count;
+} 
+
+
+
+public Action CMD_slot(int client,int args){
+    GetCmdArg(1, arg1, sizeof(arg1));
+    g_slots = StringToInt(arg1);
+    return Plugin_Handled;
+}
+
+
+void sethostname_nobody(){
+    if(slot >= g_slots)
+    {
+        g_slot = "";
         getneedconfog();
         sethostname();
     }
-    else if(slot >= 8)
+
+    if(slot < g_slots)
     {
-        g_slot = "";
+        g_slot = "[缺人]";
         getneedconfog();
         sethostname();
     }
